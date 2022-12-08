@@ -8,6 +8,10 @@ RSpec.describe Dig::Block do
       expect([1, [2]].dig(1, 0)).to eq(2)
     end
 
+    it "Returning false if the nested value is false. (Fixes Issue #1)" do
+      expect([1, [false]].dig(1, 0)).to eq(false)
+    end
+
     it "Returning nil if any intermediate step is nil." do
       expect([1, [2]].dig(1, 1)).to eq(nil)
     end
@@ -22,6 +26,10 @@ RSpec.describe Dig::Block do
       expect({ a: 1, b: { c: 2 }}.dig(:b, :c)).to eq(2)
     end
 
+    it "Returning false if the nested value is false. (Fixes Issue #1)" do
+      expect({ a: 1, b: { c: false }}.dig(:b, :c)).to eq(false)
+    end
+
     it "Returning nil if any intermediate step is nil." do
       expect({ a: 1}.dig(:b, 1)).to eq(nil)
     end
@@ -32,11 +40,15 @@ RSpec.describe Dig::Block do
   end
 
   context Struct do
-    let(:nested_object) { Struct.new(:value).new(2) }
+    let(:nested_object) { Struct.new(:value, :false_value).new(2, false) }
     let(:object) { Struct.new(:nested_object).new(nested_object) }
 
     it "Extracts the nested value specified by the sequence of idx objects by calling dig at each step." do
       expect(object.dig(:nested_object, :value)).to eq(2)
+    end
+
+    it "Returning false if the nested value is false. (Fixes Issue #1)" do
+      expect(object.dig(:nested_object, :false_value)).to eq(false)
     end
 
     it "Returning nil if any intermediate step is nil." do
@@ -49,11 +61,15 @@ RSpec.describe Dig::Block do
   end
 
   context OpenStruct do
-    let(:nested_object) { OpenStruct.new(value: 2) }
+    let(:nested_object) { OpenStruct.new(value: 2, false_value: false) }
     let(:object) { OpenStruct.new(nested_object: nested_object) }
 
     it "Extracts the nested value specified by the sequence of idx objects by calling dig at each step." do
       expect(object.dig(:nested_object, :value)).to eq(2)
+    end
+
+    it "Returning false if the nested value is false. (Fixes Issue #1)" do
+      expect(object.dig(:nested_object, :false_value)).to eq(false)
     end
 
     it "Returning nil if any intermediate step is nil." do
