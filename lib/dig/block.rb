@@ -5,7 +5,7 @@ module Dig
   module Block
     def dig(*)
       ret = super
-      return ret if ret
+      return ret unless ret.nil?
       yield if block_given?
     end
   end
